@@ -1,0 +1,163 @@
+public static void testSvnHeaderVersion() throws SVNException, Exception {
+
+		/*
+		 * 
+		 * 对版本库进行初始化操作，使用https或http访问svn时，执行DAVRepositoryFactory.setup();
+		 * 
+		 * 对于通过使用svn:// 和 svn+xxx:// 访问svn时，执行SVNRepositoryFactoryImpl.setup();
+		 * 
+		 * 对于通过file:/// 访问svn的情况，执行 FSRepositoryFactory.setup();
+		 */
+
+		SVNURL url = SVNURL
+				.parseURIEncoded("https://svn.baidu.com/app/ecom/shifen/sf-crm/branches/cdc-dm/cdc-dm_1-1-1_BRANCH/cube/fact/show/fc/dwd_fc_show_daily/t/sql/fc_show_daily_summary.sql"); // 某目录在svn的位置，获取目录对应的URL。即版本库对应的URL地址
+
+		DAVRepositoryFactory.setup(); // 初始化
+
+		ISVNOptions options = SVNWCUtil.createDefaultOptions(true); // 驱动选项
+
+		ISVNAuthenticationManager authManager = SVNWCUtil
+				.createDefaultAuthenticationManager("zhangkai05", "zhangkai05"); // 提供认证
+
+		SVNRepository repos = SVNRepositoryFactory.create(url);
+
+		repos.setAuthenticationManager(authManager); // 设置认证
+
+		System.out.println(">>> " + repos.getLocation()); // 打印出当前版本库路径
+		System.out.println(">>> " + repos.getLatestRevision()); // 获取当前版本库的最新版本
+		repos.checkout(-1, "e:/lib/", null, null);
+		// 此变量用来存放要查看的文件的属性名/属性值列表。
+		SVNProperties fileProperties = new SVNProperties();
+		// 此输出流用来存放要查看的文件的内容。
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		repos.getFile(repos.getLocation().getPath(), -1, fileProperties, baos);
+
+		baos.writeTo(System.out);
+		
+		SVNClientManager ourClientManager = SVNClientManager.newInstance((DefaultSVNOptions) options, "zhangkai05", "zhangkai05");
+		SVNUpdateClient updateClient = ourClientManager.getUpdateClient();
+
+		//sets externals not to be ignored during the checkout
+				updateClient.setIgnoreExternals(true);
+
+	}
+	public static void testS() {
+
+		// 初始化库。 必须先执行此操作。具体操作封装在setupLibrary方法中。
+		setupLibrary();
+
+		/*
+		 * 相关变量赋值
+		 */
+		String url = "https://svn.baidu.com";
+		String name = "zhangkai05";
+		String password = "zhangkai05";
+		String filePath = "/app/ecom/shifen/sf-crm/branches/cdc-dm/cdc-dm_1-1-1_BRANCH/cube/fact/show/fc/dwd_fc_show_daily/t/sql/fc_show_daily_summary.sql";
+		// 定义svn版本库的URL。
+		SVNURL repositoryURL = null;
+		// 定义版本库。
+		SVNRepository repository = null;
+		try {
+			// 获取SVN的URL。
+			repositoryURL = SVNURL.parseURIEncoded(url);
+			// 根据URL实例化SVN版本库。
+			repository = SVNRepositoryFactory.create(repositoryURL);
+		} catch (SVNException svne) {
+			/*
+			 * 打印版本库实例创建失败的异常。
+			 */
+			System.err.println("创建版本库实例时失败，版本库的URL是 '" + url + "': "
+					+ svne.getMessage());
+			System.exit(1);
+		}
+
+		/*
+		 * 对版本库设置认证信息。
+		 */
+		ISVNAuthenticationManager authManager = SVNWCUtil
+				.createDefaultAuthenticationManager(name, password);
+		repository.setAuthenticationManager(authManager);
+
+		// 此变量用来存放要查看的文件的属性名/属性值列表。
+		SVNProperties fileProperties = new SVNProperties();
+		// 此输出流用来存放要查看的文件的内容。
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+		try {
+			// 获得版本库中文件的类型状态（是否存在、是目录还是文件），参数-1表示是版本库中的最新版本。
+			SVNNodeKind nodeKind = repository.checkPath(filePath, -1);
+
+			if (nodeKind == SVNNodeKind.NONE) {
+				System.err.println("要查看的文件在 '" + url + "'中不存在.");
+				System.exit(1);
+			} else if (nodeKind == SVNNodeKind.DIR) {
+				System.err.println("要查看对应版本的条目在 '" + url + "'中是一个目录.");
+				System.exit(1);
+			}
+			// 获取要查看文件的内容和属性，结果保存在baos和fileProperties变量中。
+			repository.getFile(filePath, -1, fileProperties, baos);
+
+		} catch (SVNException svne) {
+			svne.printStackTrace();
+			System.err.println("在获取文件内容和属性时发生错误: " + svne.getMessage());
+			System.exit(1);
+		}
+
+		// 获取文件的mime-type
+		String mimeType = fileProperties.getStringValue(SVNProperty.MIME_TYPE);
+		// 判断此文件是否是文本文件
+		boolean isTextType = SVNProperty.isTextMimeType(mimeType);
+		/*
+		 * 显示文件的所有属性
+		 */
+		Iterator iterator = fileProperties.nameSet().iterator();
+		while (iterator.hasNext()) {
+			String propertyName = (String) iterator.next();
+			String propertyValue = fileProperties.getStringValue(propertyName);
+			System.out.println("文件的属性: " + propertyName + "=" + propertyValue);
+		}
+		/*
+		 * 如果文件是文本类型，则把文件的内容显示到控制台。
+		 */
+		if (isTextType) {
+			System.out.println("File contents:");
+			System.out.println();
+			try {
+				baos.writeTo(System.out);
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+		} else {
+			System.out.println("因为文件不是文本文件，无法显示！");
+		}
+		/*
+		 * 获得版本库的最新版本号。
+		 */
+		long latestRevision = -1;
+		try {
+			latestRevision = repository.getLatestRevision();
+		} catch (SVNException svne) {
+			System.err.println("获取最新版本号时出错: " + svne.getMessage());
+			System.exit(1);
+		}
+		System.out.println("");
+		System.out.println("---------------------------------------------");
+		System.out.println("版本库的最新版本号: " + latestRevision);
+		System.exit(0);
+	}
+	
+	private static void setupLibrary() {
+		/*
+		 * For using over http:// and https://
+		 */
+		DAVRepositoryFactory.setup();
+		/*
+		 * For using over svn:// and svn+xxx://
+		 */
+		SVNRepositoryFactoryImpl.setup();
+
+		/*
+		 * For using over file:///
+		 */
+		FSRepositoryFactory.setup();
+	}
