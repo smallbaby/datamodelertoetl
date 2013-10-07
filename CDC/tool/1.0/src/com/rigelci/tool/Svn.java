@@ -24,9 +24,9 @@ public class Svn {
 	
 	public static Map<String, String> modelM = new HashMap<String, String>();
 	public static final String PATH = "/home/work/zhangkai05/xml/";
-	public static final String URL_ROOT = "https://svn.baidu.com/app/ecom/shifen/sf-crm/trunk/onedata/02_数据模型/onedata/rel/";
-	public static final String USERNAME = "zhangkai05";
-	public static final String PASSWORD = "zhangkai05";
+	public static final String URL_ROOT = "https://xxxxxxxxxxxxx/app/ecom/shifen/sf-crm/trunk/onedata/02_数据模型/onedata/rel/";
+	public static final String USERNAME = "xxxxx";
+	public static final String PASSWORD = "xxxxxx";
 	public static void main(String[] args) throws Exception {
 		//testSvnHeaderVersion();
 		// 根据传入的table xml  ID先获取最新版本到本地
