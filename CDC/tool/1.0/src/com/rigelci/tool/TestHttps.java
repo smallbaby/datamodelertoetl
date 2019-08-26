@@ -63,8 +63,7 @@ public class TestHttps {
 
 	  TestHttps th = new TestHttps();
 	  // th.httpsURL =
-	// " https://service.zj.chinamobile.com/gerenwt/escape/prepay/prepaycardcharge.jsp?menuId=13050&AISSO_LOGIN=true";
-	th.httpsURL = " https://192.168.6.23:81";
+	th.httpsURL = " https://xxxxx";
 
 	  // HttpClient httpclient = new HttpClient();
 	  // httpclient.getHostConfiguration().setProxy("myproxyhost", 8080);
@@ -73,8 +72,8 @@ public class TestHttps {
 	  // " myproxyhost",
 	  // new UsernamePasswordCredentials("my-proxy-username",
 	  // "my-proxy-password"));
-	// GetMethod httpget = new GetMethod(" https://192.168.6.23:81");
-	// GetMethod httpget = new GetMethod(" https://192.168.6.23:81");
+	// GetMethod httpget = new GetMethod(" https://1xxxx81");
+	// GetMethod httpget = new GetMethod(" https://19xxxxx");
 	  // try {
 	  // httpclient.executeMethod(httpget);
 	  // System.out.println(httpget.getStatusLine());
